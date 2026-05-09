@@ -153,22 +153,22 @@ Dim Date = ADDCOLUMNS(
 -- Quantité totale vendue
 Total_Ventes = SUM('Fact OrderSales'[Quantity])
 
--- Chiffre d'affaires (prix × quantité + frais de port, après remise)
+-- Chiffre d'affaires
 CA = SUMX('Fact OrderSales' , [Quantity]*[UnitPrice]+[Freight])
 
--- Dépenses (valeur du stock disponible + en commande)
+-- Dépenses
 Depenses = SUMX('Fact OrderPurchases', ([UnitsOnOrder] + [UnitsInStock]) * [UnitPrice])
 
 -- Profit
 Profit = [CA] - [Depenses]
 
--- Marge (par rapport au chiffre d'affaires)
+-- Marge
 Marge = DIVIDE([Profit] , [Total_Ventes],0)
 
 -- Taux de croissance annuel
 Croissance% = DIVIDE([Total_Ventes] - [Quantite_Last_YtD], [Quantite_Last_YtD], 0)
 
--- Quantité cumulée (YTD)
+-- Quantité cumulée
 Quantite_YTD = TOTALYTD([Total_Ventes], 'Dim Date'[Date])
 
 -- Quantité année précédente
