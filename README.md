@@ -20,7 +20,7 @@ Le pipeline suit une architecture en 4 couches :
 | Outil | Rôle |
 |---|---|
 | **SQL Server (SSMS)** | Création des bases, conception des schémas, scripts SQL |
-| **SSIS (Visual Studio)** | Pipeline ETL — Landing, Staging, alimentation DWH |
+| **SSIS (Visual Studio)** | Pipeline ETL de Landing, Staging, alimentation DWH |
 | **Power BI Desktop** | Modélisation des données, mesures DAX, dashboard |
 
 ---
