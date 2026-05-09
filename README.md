@@ -52,7 +52,9 @@ La couche Landing est une **copie brute et non modifiée** des tables sources. L
 **Package SSIS — `Landing.dtsx` :**
 
 Toutes les tâches sont séquencées dans un **Conteneur de séquences** avec des Contraintes de précédence assurant une exécution ordonnée et contrôlée.
+
 ![Package Landing](Ressources/Landing.png)
+
 
 Chaque tâche de flux de données contient :
 - **Source OLE DB** → table Northwind
