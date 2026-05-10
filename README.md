@@ -27,7 +27,7 @@ Le pipeline suit une architecture en 4 couches :
 
 ## Base source : Northwind
 
-Northwind est une base **OLTP** entièrement normalisée représentant une entreprise qui achète des produits auprès de fournisseurs et les revend à des clients.
+Northwind est une base **OLTP** représentant une entreprise qui achète des produits auprès de fournisseurs et les revend à des clients.
 
 **Tables utilisées comme source :**
 
@@ -51,15 +51,15 @@ La couche Landing est une **copie brute et non modifiée** des tables sources. L
 
 **Package SSIS — `Landing.dtsx` :**
 
-Toutes les tâches sont séquencées dans un **Conteneur de séquences** avec des Contraintes de précédence assurant une exécution ordonnée et contrôlée.
+Toutes les tâches sont séquencées dans un **Conteneur de séquences** avec des contraintes de précédence assurant une exécution ordonnée et contrôlée.
 
 ![Package Landing](Ressources/Landing.png)
 
 
 Chaque tâche de flux de données contient :
-- **Source OLE DB** → table Northwind
-- **Conversion de données** → standardisation des types
-- **Destination OLE DB** → table Landing correspondante
+- **Source OLE DB** : table Northwind
+- **Conversion de données** : standardisation des types
+- **Destination OLE DB** : table Landing correspondante
 
 ![Exemple de tâche de flux de données Landing](Ressources/DTF_Landing.png)
 
@@ -71,19 +71,19 @@ La couche Staging **nettoie, transforme et joint** les données depuis les table
 
 **Règles appliquées :**
 - Jointures entre tables Landing
-- Conversion des types via la tâche **Conversion de données**
+- Conversion des données en types adéquats via la tâche **Conversion de données**
 - Ajout de `Insert_Date = GETDATE()` via la tâche **Colonne dérivée** et correction des défauts détectés comme les valeurs nulles
-- Une table Staging par destination finale (Dim ou Fact)
+- Ajout de la table Staging par destination finale (Dim ou Fact)
 
 **Package SSIS — `Staging.dtsx` :**
 
 ![Package Staging](Ressources/Staging.png)
 
 Chaque tâche de flux de données contient :
-- **Source OLE DB** → requête SQL avec JOINs depuis les tables Landing
-- **Conversion de données** → types adéquats pour chaque colonne
-- **Colonne dérivée** → ajout de `Insert_Date` et correction des problèmes détectés
-- **Destination OLE DB** → table Staging correspondante
+- **Source OLE DB** : requête SQL avec JOINs depuis les tables Landing
+- **Conversion de données** : types adéquats pour chaque colonne
+- **Colonne dérivée** : ajout de `Insert_Date` et correction des problèmes détectés
+- **Destination OLE DB** : table Staging correspondante
   
 ![Exemple de tâche de flux de données Staging](Ressources/DTF_Staging.png)
 
@@ -93,24 +93,24 @@ Chaque tâche de flux de données contient :
 
 #### Tables de dimensions : SCD Type 1
 
-Les dimensions sont chargées via la stratégie **Slowly Changing Dimension Type 1**. Les enregistrements existants sont mis à jour avec les nouvelles valeurs, et les nouveaux enregistrements sont insérés.
+Les dimensions sont chargées via la stratégie **Slowly Changing Dimension Type 1**. Les enregistrements existants sont mis à jour avec les nouvelles valeurs, et les nouveaux enregistrements sont insérés. Des **Surrogate Keys** ont été générés pour assurer l'uniformité des liens entre les tables Fact et celles Dim.
 
 **Package SSIS — `Alimentation_DataWarehouse.dtsx` :**
 
 ![Package Alimentation DWH](Ressources/DWH.png)
 
 Chaque tâche de flux de données contient :
-- **Source OLE DB** → table Staging correspondante
-- **Recherche** → vérification de la clé naturelle dans la table Dim
-- **Sans correspondance** → insertion des données dans la table Dim (nouveau enregistrement)
-- **Avec correspondance** → mise à jour des données existantes via une requête SQL dynamique (SCD Type 1)
+- **Source OLE DB**: table Staging correspondante
+- **Recherche** : vérification de la clé naturelle dans la table Dim
+- **Sans correspondance** : insertion des données dans la table Dim (nouveau enregistrement)
+- **Avec correspondance** : mise à jour des données existantes via une requête SQL dynamique (SCD Type 1)
 ![Tâche de flux de données DimCustomer](Ressources/DTF_DWH.png)
 
 ---
 
 #### Tables de faits : Chargement incrémental
 
-Les nouvelles commandes sont détectées via une **Recherche** sur `OrderID`. Seules les lignes sans correspondance (nouvelles transactions) sont insérées. Les lignes existantes sont ignorées — une transaction passée ne se modifie jamais.
+Les nouvelles commandes sont détectées via une **Recherche** sur `OrderID`. L'approche adoptée est l'ajout incrémental : Seules les lignes sans correspondance (nouvelles transactions) sont insérées, tandis que les lignes existantes sont ignorées (une transaction passée ne se modifie jamais).
 
 ---
 
